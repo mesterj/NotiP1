@@ -15,9 +15,14 @@ import android.os.Bundle
 import android.support.v4.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.info
 
 class MainActivity : AppCompatActivity() , AnkoLogger{
+    companion object {
+        val NOTIF_PREF : String = "NOTIFICATION_PREF"
+        val NOTIF_ID : String = "NOTIFICATION_ID"
+    }
 
     val NOTIFICIATION_CHANNEL_ID= "NOTICHAN"
     lateinit var notificationmanager: NotificationManager
@@ -25,6 +30,9 @@ class MainActivity : AppCompatActivity() , AnkoLogger{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        var sp = getSharedPreferences(NOTIF_PREF, Context.MODE_PRIVATE)
+        var nextnotifid = sp.getInt(NOTIF_ID,0)
 
         notificationmanager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -51,7 +59,11 @@ class MainActivity : AppCompatActivity() , AnkoLogger{
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                     .setContentIntent(notifPendingintent)
 
-            notificationmanager.notify(0,notibuilder.build())
+            notificationmanager.notify(nextnotifid,notibuilder.build())
+            nextnotifid++
+            sp.edit().putInt(NOTIF_ID,nextnotifid).apply()
+            info("Next notif id : $nextnotifid")
+            info("Stored id: ${sp.getInt(NOTIF_ID,1545)}")
             finish()
         }
     }
